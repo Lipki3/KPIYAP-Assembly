@@ -18,7 +18,7 @@ increment proc
         ret 
 increment endp 
 
-if_number proc   ;проверка числа
+if_number proc   ;ГЇГ°Г®ГўГҐГ°ГЄГ  Г·ГЁГ±Г«Г 
         cmp al, '-'
 		je metka
 		jne cont
@@ -41,7 +41,7 @@ cont:
         ret
 if_number endp
 
-if_num_letter proc ; проверка h числа
+if_num_letter proc ; ГЇГ°Г®ГўГҐГ°ГЄГ  h Г·ГЁГ±Г«Г 
         cmp    al,    'A'
         jl     metka2
         cmp    al,    'F'
@@ -119,7 +119,7 @@ Next:
         mov     di,     si
         loop    For
 		
-error_input:                            ; проблемный ввод
+error_input:                            ; ГЇГ°Г®ГЎГ«ГҐГ¬Г­Г»Г© ГўГўГ®Г¤
         mov     dx,     offset Error
         output_string
         jmp     error_end 
