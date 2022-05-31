@@ -18,7 +18,10 @@ TAB equ 9h
 NEW_LINE equ 0Ah
 CARRIAGE_RETURN equ 0Dh
 
-error_message1 db "Invalid parameters.",13,10,'$' 
+error_message1 db "Invalid parameters.",13,10,'$'  
+ins_message db "Program was installed.",13,10,'$' 
+unins_message db "Program was uninstalled.",13,10,'$'   
+
 
 display_x db 0
 display_y db 0
@@ -31,7 +34,7 @@ BUFFER_LENGTH equ 16
 
 buffer db BUFFER_LENGTH dup(0)
     
-attribute db 3Fh
+attribute db 2Fh
 
 old_int1Ch_handler dd 0F0001260h
 
@@ -458,32 +461,36 @@ free_memory PROC
 free_memory ENDP    
 
 install:
-    mov ax,0003h
-    int 10h
+      mov ax,0003h
+        int 10h
     
     mov ax,cs
     mov es,ax
     
     call read_command_line
-    mov ds,ax
+    mov ds,ax  
+    
+    
     
     call check_int60h_handler
     cmp cx,0
     je not_installed_already
         
         call uninstall_int1Ch_handler
-        
         call free_memory
-        
-        xor ax,ax
-        call set_int60h_handler
+         call set_int60h_handler   
+          mov ax,0003h
+        int 10h
+         
 
-    not_installed_already:
-
-    mov dx,1
+    not_installed_already:    
+    
+      mov dx,1
     mov [max_coordinate_value],MAX_X
-    call get_number_from_cmd_line
-    cmp ax,0FFh
+    call get_number_from_cmd_line  
+    cmp ax, 0
+    je del
+    cmp ax,0FFh   
     je invalid_parameter
     mov [display_x],al 
     
@@ -493,22 +500,36 @@ install:
     cmp ax,0FFh
     je invalid_parameter
     mov [display_y],al
-    
 
     mov ax,cs
     call set_int60h_handler
+    call install_int1Ch_handler  
     
-    call install_int1Ch_handler
-
-    
+    mov dx,offset ins_message
+        show_str  
     mov ax,3100h
     mov dx,(end_of_resident_part-start+110h)/16+1
     int 21h
     
-    invalid_parameter:
+    
+     
+    del:
+     call uninstall_int1Ch_handler 
+        call free_memory
+         call set_int60h_handler   
+          mov ax,0003h
+        int 10h
+        mov dx,offset unins_message
+        show_str 
+        jmp exit 
+                      
+         invalid_parameter:   
+     
     mov dx,offset error_message1
     show_str
     
+    
+    exit:
     mov ax,4c00h
     int 21h
             
